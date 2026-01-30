@@ -160,7 +160,11 @@ export enum SelectedTrait {
   Bottom = 3,
 }
 
-export type DyeSelection = [number, number, number, number];
+export type DyeSelection =
+  | [number, number, number, number]
+  | [number, number, number]
+  | [number, number]
+  | [number];
 
 export enum VisibilityFlags {
   Aquabreather = 1,

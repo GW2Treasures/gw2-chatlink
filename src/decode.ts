@@ -1,5 +1,6 @@
 import { ChatlinkError } from './error.js';
 import { ChatlinkType, Profession, type DecodedChatlink, type DyeSelection, type TraitSelection } from './types.js';
+import { ItemFlags, toHex } from './utils.js';
 
 /**
  * Decode a Guild Wars 2 chatlink.
@@ -83,11 +84,11 @@ export function decode(input: string, expectedType?: ChatlinkType): DecodedChatl
           data: {
             itemId,
             quantity,
-            skin: flags & 0x80 ? data.readUint32() : undefined,
-            upgrade1: flags & 0x40 ? data.readUint32() : undefined,
-            upgrade2: flags & 0x20 ? data.readUint32() : undefined,
-            nameDecryptionKey: flags & 0x10 ? data.readBigUint64() : undefined,
-            descriptionDecryptionKey: flags & 0x08 ? data.readBigUint64() : undefined,
+            skin: flags & ItemFlags.HasSkin ? data.readUint32() : undefined,
+            upgrade1: flags & ItemFlags.HasUpgrade1 ? data.readUint32() : undefined,
+            upgrade2: flags & ItemFlags.HasUpgrade2 ? data.readUint32() : undefined,
+            nameDecryptionKey: flags & ItemFlags.HasNameDecryptionKey ? data.readBigUint64() : undefined,
+            descriptionDecryptionKey: flags & ItemFlags.HasDescriptionDecryptionKey ? data.readBigUint64() : undefined,
           }
         };
       }
@@ -372,8 +373,4 @@ function reader(buffer: ArrayBuffer) {
       return str;
     }
   };
-}
-
-function toHex(byte: number): string {
-  return byte.toString(16).padStart(2, '0').toUpperCase();
 }

@@ -3,3 +3,8 @@ interface Uint8ArrayConstructor {
   static fromBase64?(string: string, options?: { alphabet: 'base64' | 'base64url', lastChunkHandling?: 'loose' | 'strict' | 'stop-before-partial' }): Uint8Array<ArrayBuffer>;
 }
 
+interface Uint8Array {
+  /** @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array/toBase64 */
+  toBase64?(options?: { alphabet: 'base64' | 'base64url', omitPadding?: boolean }): string;
+}
+

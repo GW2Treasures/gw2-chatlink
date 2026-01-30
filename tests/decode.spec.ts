@@ -48,6 +48,7 @@ describe('decode', () => {
     ['[&AgG3lAEY//dMDMoaAACcKPfjhxoAAA==]', { type: ChatlinkType.Item, data: { itemId: 103607, quantity: 1, descriptionDecryptionKey: 29170947532956n, nameDecryptionKey: 29455092086783n }}],
     ['[&AgEljwEQrQat094aAAA=]', { type: ChatlinkType.Item, data: { itemId: 102181, quantity: 1, nameDecryptionKey: 29544336393901n }}],
     // build template
+    // legacy build template (no weapon selection)
     ['[&DQYfLSkaOCcXAXQANRfLAL4BjwBOARwBlwCWAAAAAAAAAAAAAAAAAAAAAAA=]', {
       type: ChatlinkType.BuildTemplate,
       data: {
