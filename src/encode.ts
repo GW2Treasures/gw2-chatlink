@@ -7,6 +7,20 @@ type EncodeChatlinkArgs = {
   [T in ChatlinkType]: [type: T, data: ChatlinkData<T>];
 }[ChatlinkType]
 
+/**
+ * Encode a Guild Wars 2 chatlink.
+ * @param type The type of chatlink to encode
+ * @param data The data of the chatlink
+ * @returns The encoded chatlink string
+ * @example
+ * ```ts
+ * import { encodeChatlink } from '@gw2/chatlink';
+ *
+ * const chatlink = encodeChatlink(ChatlinkType.Item, { itemId: 46762, quantity: 1, skin: 3709 });
+ *
+ * console.log(chatlink); // "[&AgGqtgCAfQ4AAA==]"
+ * ```
+ */
 export function encode<T extends ChatlinkType>(type: T, data: ChatlinkData<T>): `[&${string}]`;
 export function encode(...[type, data]: EncodeChatlinkArgs): `[&${string}]` {
   const bytes = writer();

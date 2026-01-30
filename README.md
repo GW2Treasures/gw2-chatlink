@@ -1,6 +1,6 @@
 # @gw2/chatlink
 
-**@gw2/chatlink** is a modern library to encode and decode Guild Wars 2 chatlinks in all runtimes.
+**@gw2/chatlink** is a modern library to encode and decode Guild Wars 2 chatlinks in all modern runtimes.
 
 ## Installation
 
@@ -13,13 +13,13 @@ npm install @gw2/chatlink
 ## Usage
 
 ```ts
-import { encode, decode, ChatlinkType } from '@gw2/chatlink';
+import { encodeChatlink, decodeChatlink, ChatlinkType } from '@gw2/chatlink';
 
-encode(ChatlinkType.Item, { id: 46762, quantity: 10, skin: 5807, upgrades: [24554, 24615] })
-// -> '[&AgGqtgDgrxYAAOpfAAAnYAAA]'
+encodeChatlink(ChatlinkType.Item, { itemId: 46762, quantity: 1, skin: 3709 })
+// "[&AgGqtgCAfQ4AAA==]"
 
-decode('[&BtIWAAA=]')
-// -> { type: ChatlinkType.Skin, id: 5842 }
+decodeChatlink('[&BtIWAAA=]')
+// "{ type: ChatlinkType.Skin, id: 5842 }"
 ```
 
 ## License

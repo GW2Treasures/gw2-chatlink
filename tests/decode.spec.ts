@@ -1,4 +1,4 @@
-import { ChatlinkType, decode } from '../src/index.js';
+import { ChatlinkType, decodeChatlink } from '../src/index.js';
 import { describe, expect, test } from 'vitest';
 import { Profession } from '../src/types.js';
 
@@ -435,22 +435,22 @@ describe('decode', () => {
       }
     }],
   ] as const)('decode %s', ([input, expected]) => {
-    expect(decode(input)).toEqual(expected);
+    expect(decodeChatlink(input)).toEqual(expected);
   });
 });
 
 test('invalid chatlink', () => {
   // invalid base64
-  expect(() => decode('[&INVALID!]')).toThrowError('Invalid chatlink');
+  expect(() => decodeChatlink('[&INVALID!]')).toThrowError('Invalid chatlink');
   // missing data
-  expect(() => decode('[&AQ==]')).toThrowError('Invalid chatlink');
+  expect(() => decodeChatlink('[&AQ==]')).toThrowError('Invalid chatlink');
   // invalid format
-  expect(() => decode('invalid')).toThrowError('Invalid chatlink');
+  expect(() => decodeChatlink('invalid')).toThrowError('Invalid chatlink');
 });
 
 test('unexpected type', () => {
-  expect(() => decode('[&AQAAAAA=]', ChatlinkType.Achievement)).toThrowError('Unexpected chatlink type: expected 0x0E, got 0x01');
+  expect(() => decodeChatlink('[&AQAAAAA=]', ChatlinkType.Achievement)).toThrowError('Unexpected chatlink type: expected 0x0E, got 0x01');
 });
 test('expected type', () => {
-  expect(() => decode('[&AQAAAAA=]', ChatlinkType.Coin)).not.toThrowError();
+  expect(() => decodeChatlink('[&AQAAAAA=]', ChatlinkType.Coin)).not.toThrowError();
 });

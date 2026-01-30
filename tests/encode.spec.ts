@@ -1,4 +1,4 @@
-import { ChatlinkType, encode } from '../src/index.js';
+import { ChatlinkType, encodeChatlink } from '../src/index.js';
 import { describe, expect, test } from 'vitest';
 import { DecodedChatlink, Profession } from '../src/types.js';
 
@@ -409,7 +409,7 @@ describe('encode', () => {
       }
     }],
   ] as [string, DecodedChatlink][])('encode %s', ([expected, { type, data }]) => {
-    expect(encode(type, data)).toEqual(expected);
+    expect(encodeChatlink(type, data)).toEqual(expected);
   });
 });
 
