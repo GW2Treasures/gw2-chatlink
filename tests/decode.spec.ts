@@ -4,39 +4,39 @@ import { Profession } from '../src/types.js';
 
 test.for([
   // coin
-  ['[&AQAAAAA=]', { type: ChatlinkType.Coin, value: 0 }],
-  ['[&AQEAAAA=]', { type: ChatlinkType.Coin, value: 1 }],
-  ['[&AdsnAAA=]', { type: ChatlinkType.Coin, value: 10203 }],
+  ['[&AQAAAAA=]', { type: ChatlinkType.Coin, data: 0 }],
+  ['[&AQEAAAA=]', { type: ChatlinkType.Coin, data: 1 }],
+  ['[&AdsnAAA=]', { type: ChatlinkType.Coin, data: 10203 }],
   // npc text
-  ['[&AxcnAAA=]', { type: ChatlinkType.NpcText, id: 10007 }],
-  ['[&AxgnAAA=]', { type: ChatlinkType.NpcText, id: 10008 }],
-  ['[&AxknAAA=]', { type: ChatlinkType.NpcText, id: 10009 }],
-  ['[&AyAnAAA=]', { type: ChatlinkType.NpcText, id: 10016 }],
+  ['[&AxcnAAA=]', { type: ChatlinkType.NpcText, data: 10007 }],
+  ['[&AxgnAAA=]', { type: ChatlinkType.NpcText, data: 10008 }],
+  ['[&AxknAAA=]', { type: ChatlinkType.NpcText, data: 10009 }],
+  ['[&AyAnAAA=]', { type: ChatlinkType.NpcText, data: 10016 }],
   // map
-  ['[&BDgAAAA=]', { type: ChatlinkType.Map, id: 56 }],
-  ['[&BEgAAAA=]', { type: ChatlinkType.Map, id: 72 }],
-  ['[&BDkDAAA=]', { type: ChatlinkType.Map, id: 825 }],
+  ['[&BDgAAAA=]', { type: ChatlinkType.Map, data: 56 }],
+  ['[&BEgAAAA=]', { type: ChatlinkType.Map, data: 72 }],
+  ['[&BDkDAAA=]', { type: ChatlinkType.Map, data: 825 }],
   // skill
-  ['[&BucCAAA=]', { type: ChatlinkType.Skill, id: 743 }],
-  ['[&BnMVAAA=]', { type: ChatlinkType.Skill, id: 5491 }],
-  ['[&Bn0VAAA=]', { type: ChatlinkType.Skill, id: 5501 }],
+  ['[&BucCAAA=]', { type: ChatlinkType.Skill, data: 743 }],
+  ['[&BnMVAAA=]', { type: ChatlinkType.Skill, data: 5491 }],
+  ['[&Bn0VAAA=]', { type: ChatlinkType.Skill, data: 5501 }],
   // trait
-  ['[&B/IDAAA=]', { type: ChatlinkType.Trait, id: 1010 }],
+  ['[&B/IDAAA=]', { type: ChatlinkType.Trait, data: 1010 }],
   // user
-  ['[&CAECAwQFBgcICQoLDA0ODxBFAGEAcwB0AGUAcgAAAA==]', { type: ChatlinkType.User, accountId: '04030201-0605-0807-090A-0B0C0D0E0F10', character: 'Easter' }],
+  ['[&CAECAwQFBgcICQoLDA0ODxBFAGEAcwB0AGUAcgAAAA==]', { type: ChatlinkType.User, data: { accountId: '04030201-0605-0807-090A-0B0C0D0E0F10', characterName: 'Easter' } }],
   // recipe
-  ['[&CQEAAAA=]', { type: ChatlinkType.Recipe, id: 1 }],
-  ['[&CQIAAAA=]', { type: ChatlinkType.Recipe, id: 2 }],
-  ['[&CQcAAAA=]', { type: ChatlinkType.Recipe, id: 7 }],
+  ['[&CQEAAAA=]', { type: ChatlinkType.Recipe, data: 1 }],
+  ['[&CQIAAAA=]', { type: ChatlinkType.Recipe, data: 2 }],
+  ['[&CQcAAAA=]', { type: ChatlinkType.Recipe, data: 7 }],
   // wardrobe
-  ['[&CwQAAAA=]', { type: ChatlinkType.Outfit, id: 4 }],
+  ['[&CwQAAAA=]', { type: ChatlinkType.Outfit, data: 4 }],
   // wvw objective
-  ['[&DAYAAAAmAAAA]', { type: ChatlinkType.WvWObjective, mapId: 38, objectiveId: 6 }],
+  ['[&DAYAAAAmAAAA]', { type: ChatlinkType.WvWObjective, data: { mapId: 38, objectiveId: 6 } }],
   // achievement
-  ['[&DrYAAAA=]', { type: ChatlinkType.Achievement, id: 182 }],
-  ['[&DpEGAAA=]', { type: ChatlinkType.Achievement, id: 1681 }],
-  ['[&DoQZAAA=]', { type: ChatlinkType.Achievement, id: 6532 }],
-  ['[&DuMbAAA=]', { type: ChatlinkType.Achievement, id: 7139 }],
+  ['[&DrYAAAA=]', { type: ChatlinkType.Achievement, data: 182 }],
+  ['[&DpEGAAA=]', { type: ChatlinkType.Achievement, data: 1681 }],
+  ['[&DoQZAAA=]', { type: ChatlinkType.Achievement, data: 6532 }],
+  ['[&DuMbAAA=]', { type: ChatlinkType.Achievement, data: 7139 }],
   // items
   ['[&AgGqtgAA]', { type: ChatlinkType.Item, data: { itemId: 46762, quantity: 1 } }],
   ['[&AgGqtgBA/18AAA==]', { type: ChatlinkType.Item, data: { itemId: 46762, quantity: 1, upgrade1: 24575 }}],
@@ -224,9 +224,214 @@ test.for([
 
       selectedWeapons: [265, 54],
     }
-  }]
+  }],
+  ['[&DwAAAAABAAEAAQABAAAAAQABAAEAAQAAAAEAAQABAAEAAAABAAEAAQABAAAAAQABAAEAAQAAAAEAAQABAAEAAAABAAEAAQABAAAAAQABAAEAAQAAAAAAAAAAAAAAAAD/fw==]', {
+    type: ChatlinkType.FashionTemplate,
+    data: {
+      aquabreather: 0,
+      backpack: 0,
+      backpackDyes: [
+        1,
+        1,
+        1,
+        1,
+      ],
+      boots: 0,
+      bootsDyes: [
+        1,
+        1,
+        1,
+        1,
+      ],
+      coat: 0,
+      coatDyes: [
+        1,
+        1,
+        1,
+        1,
+      ],
+      gloves: 0,
+      glovesDyes: [
+        1,
+        1,
+        1,
+        1,
+      ],
+      helm: 0,
+      helmDyes: [
+        1,
+        1,
+        1,
+        1,
+      ],
+      leggings: 0,
+      leggingsDyes: [
+        1,
+        1,
+        1,
+        1,
+      ],
+      outfit: 0,
+      outfitDyes: [
+        1,
+        1,
+        1,
+        1,
+      ],
+      shoulders: 0,
+      shouldersDyes: [
+        1,
+        1,
+        1,
+        1,
+      ],
+      visibilityFlags: 32767,
+      weaponA1: 0,
+      weaponA2: 0,
+      weaponAquatic1: 0,
+      weaponAquatic2: 0,
+      weaponB1: 0,
+      weaponB2: 0,
+    }
+  }],
+  ['[&D1cDGAQBAAEAAQABAAQAAQABAAEAAQAQAAEAAQABAAEAGQABAAEAAQABAFUAAQABAAEAAQADAAEAAQABAAEAHQABAAEAAQABACwAAQABAAEAAQASDIUNdQ1zDZYNkw3/fw==]', {
+    type: ChatlinkType.FashionTemplate,
+    data: {
+      aquabreather: 855,
+      backpack: 1048,
+      backpackDyes: [
+        1,
+        1,
+        1,
+        1,
+      ],
+      boots: 16,
+      bootsDyes: [
+        1,
+        1,
+        1,
+        1,
+      ],
+      coat: 4,
+      coatDyes: [
+        1,
+        1,
+        1,
+        1,
+      ],
+      gloves: 25,
+      glovesDyes: [
+        1,
+        1,
+        1,
+        1,
+      ],
+      helm: 85,
+      helmDyes: [
+        1,
+        1,
+        1,
+        1,
+      ],
+      leggings: 3,
+      leggingsDyes: [
+        1,
+        1,
+        1,
+        1,
+      ],
+      outfit: 44,
+      outfitDyes: [
+        1,
+        1,
+        1,
+        1,
+      ],
+      shoulders: 29,
+      shouldersDyes: [
+        1,
+        1,
+        1,
+        1,
+      ],
+      visibilityFlags: 32767,
+      weaponA1: 3445,
+      weaponA2: 3443,
+      weaponAquatic1: 3090,
+      weaponAquatic2: 3461,
+      weaponB1: 3478,
+      weaponB2: 3475,
+    }
+  }],
+  ['[&D1oDNycOAHkBZwJ5AW8vDgB5AWcCAQCTBQ4AeQEBAAEANwUOAHkBZwIBAEwhDgB5AWcCeQHmBA4AeQFnAgEAdyYOAHkBZwJ5ASwAqAJqAXUAvAISMr8OITGfLlMm2TL/fw==]', {
+    type: ChatlinkType.FashionTemplate,
+    data: {
+      aquabreather: 858,
+      backpack: 10039,
+      backpackDyes: [
+        14,
+        377,
+        615,
+        377,
+      ],
+      boots: 1427,
+      bootsDyes: [
+        14,
+        377,
+        1,
+        1,
+      ],
+      coat: 12143,
+      coatDyes: [
+        14,
+        377,
+        615,
+        1,
+      ],
+      gloves: 1335,
+      glovesDyes: [
+        14,
+        377,
+        615,
+        1,
+      ],
+      helm: 8524,
+      helmDyes: [
+        14,
+        377,
+        615,
+        377,
+      ],
+      leggings: 1254,
+      leggingsDyes: [
+        14,
+        377,
+        615,
+        1,
+      ],
+      outfit: 44,
+      outfitDyes: [
+        680,
+        362,
+        117,
+        700,
+      ],
+      shoulders: 9847,
+      shouldersDyes: [
+        14,
+        377,
+        615,
+        377,
+      ],
+      visibilityFlags: 32767,
+      weaponA1: 12577,
+      weaponA2: 11935,
+      weaponAquatic1: 12818,
+      weaponAquatic2: 3775,
+      weaponB1: 9811,
+      weaponB2: 13017,
+    }
+  }],
 ] as const)('decode %s', ([input, expected]) => {
   expect(decode(input)).toEqual(expected);
-
-  const test = decode(input);
 });

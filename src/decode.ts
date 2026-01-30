@@ -1,22 +1,65 @@
-import { ChatlinkType, Profession } from './types.js';
+import { ChatlinkType, Profession, type DecodedChatlink, type DyeSelection, type TraitSelection } from './types.js';
 
-export function decode(input: string) {
+/**
+ * Decode a Guild Wars 2 chatlink.
+ * @param input The chatlink string to decode.
+ * @returns The decoded chatlink data.
+ * @throws {Error} If the chatlink format is invalid.
+ * @example
+ * ```ts
+ * import { decode } from '@gw2/chatlink';
+ *
+ * const chatlink = decode('[&AgGqtgCAfQ4AAA==]');
+ * console.log(chatlink);
+ * // {
+ * //   type: ChatlinkType.Item,
+ * //   data: { itemId: 46762, quantity: 1, skin: 3709 }
+ * // }
+ * ```
+ */
+export function decode(input: string): DecodedChatlink;
+/**
+ * Decode a Guild Wars 2 chatlink.
+ * @param input The chatlink string to decode.
+ * @param expectedType Expected chatlink type.
+ * @returns The decoded chatlink data.
+ * @throws {Error} If the chatlink format is invalid or the type does not match the expected type.
+ * @example
+ * ```ts
+ * import { decode } from '@gw2/chatlink';
+ *
+ * const chatlink = decode('[&AgGqtgCAfQ4AAA==]', ChatlinkType.Item);
+ * console.log(chatlink);
+ * // {
+ * //   type: ChatlinkType.Item,
+ * //   data: { itemId: 46762, quantity: 1, skin: 3709 }
+ * // }
+ * ```
+ */
+export function decode<T extends ChatlinkType>(input: string, expectedType: T): DecodedChatlink<T>;
+export function decode(input: string, expectedType?: ChatlinkType): DecodedChatlink {
   // input is in the form of `[&<base64>]`
   if (!input.startsWith('[&') || !input.endsWith(']')) {
     throw new Error('Invalid chatlink format');
   }
 
   // convert base64 input to ArrayBuffer
-  const buffer = Uint8Array.from(atob(input.slice(2, -1)), c => c.charCodeAt(0)).buffer;
+  const buffer = 'fromBase64' in Uint8Array
+    ? Uint8Array.fromBase64(input.slice(2, -1)).buffer
+    : Uint8Array.from(atob(input.slice(2, -1)), c => c.charCodeAt(0)).buffer;
 
   const data = reader(buffer);
 
   // read type
   const type = data.readUint8();
 
+  // check expected type
+  if (expectedType && type !== expectedType) {
+    throw new Error(`Unexpected chatlink type: expected ${expectedType}, got ${type}`);
+  }
+
   switch(type) {
     case ChatlinkType.Coin:
-      return { type, value: data.readUint32() };
     case ChatlinkType.NpcText:
     case ChatlinkType.Map:
     case ChatlinkType.Skill:
@@ -25,7 +68,7 @@ export function decode(input: string) {
     case ChatlinkType.Wardrobe:
     case ChatlinkType.Outfit:
     case ChatlinkType.Achievement:
-      return { type, id: data.readUint32() };
+      return { type, data: data.readUint32() };
     case ChatlinkType.Item: {
       const quantity = data.readUint8();
       const itemIdAndFlags = data.readUint32();
@@ -47,11 +90,11 @@ export function decode(input: string) {
       };
     }
     case ChatlinkType.PvpGame:
-      return { type }; // unknown format
+      return { type, data: undefined }; // unknown format
     case ChatlinkType.User:
-      return { type, accountId: data.readUuid(), character: data.readString() };
+      return { type, data: { accountId: data.readUuid(), characterName: data.readString() }};
     case ChatlinkType.WvWObjective:
-      return { type, objectiveId: data.readUint32(), mapId: data.readUint32() };
+      return { type, data: { objectiveId: data.readUint32(), mapId: data.readUint32() }};
     case ChatlinkType.BuildTemplate: {
       const profession = data.readUint8() as Profession;
 
@@ -166,6 +209,61 @@ export function decode(input: string) {
         }
       };
     }
+    case ChatlinkType.FashionTemplate:
+      const aquabreather = data.readUint16();
+      const backpack = data.readUint16();
+      const backpackDyes: DyeSelection = [data.readUint16(), data.readUint16(), data.readUint16(), data.readUint16()];
+      const coat = data.readUint16();
+      const coatDyes: DyeSelection = [data.readUint16(), data.readUint16(), data.readUint16(), data.readUint16()];
+      const boots = data.readUint16();
+      const bootsDyes: DyeSelection = [data.readUint16(), data.readUint16(), data.readUint16(), data.readUint16()];
+      const gloves = data.readUint16();
+      const glovesDyes: DyeSelection = [data.readUint16(), data.readUint16(), data.readUint16(), data.readUint16()];
+      const helm = data.readUint16();
+      const helmDyes: DyeSelection = [data.readUint16(), data.readUint16(), data.readUint16(), data.readUint16()];
+      const leggings = data.readUint16();
+      const leggingsDyes: DyeSelection = [data.readUint16(), data.readUint16(), data.readUint16(), data.readUint16()];
+      const shoulders = data.readUint16();
+      const shouldersDyes: DyeSelection = [data.readUint16(), data.readUint16(), data.readUint16(), data.readUint16()];
+      const outfit = data.readUint16();
+      const outfitDyes: DyeSelection = [data.readUint16(), data.readUint16(), data.readUint16(), data.readUint16()];
+      const weaponAquatic1 = data.readUint16();
+      const weaponAquatic2 = data.readUint16();
+      const weaponA1 = data.readUint16();
+      const weaponA2 = data.readUint16();
+      const weaponB1 = data.readUint16();
+      const weaponB2 = data.readUint16();
+      const visibilityFlags = data.readUint16();
+
+      return {
+        type,
+        data: {
+          aquabreather,
+          backpack,
+          backpackDyes,
+          coat,
+          coatDyes,
+          boots,
+          bootsDyes,
+          gloves,
+          glovesDyes,
+          helm,
+          helmDyes,
+          leggings,
+          leggingsDyes,
+          shoulders,
+          shouldersDyes,
+          outfit,
+          outfitDyes,
+          weaponAquatic1,
+          weaponAquatic2,
+          weaponA1,
+          weaponA2,
+          weaponB1,
+          weaponB2,
+          visibilityFlags,
+        }
+      };
     default:
       throw new Error(`Unknown chatlink type: ${type}`);
   }
@@ -199,7 +297,7 @@ function reader(buffer: ArrayBuffer) {
       return value;
     },
 
-    readTraitSelection: () => {
+    readTraitSelection: (): TraitSelection => {
       const byte = view.getUint8(index++);
       return [
         (byte & 3),
@@ -246,17 +344,10 @@ function reader(buffer: ArrayBuffer) {
       const bytes = new Uint8Array(buffer, index, 16);
       index += 16;
 
-      // convert byte to hex
-      const toHex = (num: number) => num.toString(16).padStart(2, '0').toUpperCase();
-
       // format as UUID
-      return (
-        toHex(bytes[3]!) + toHex(bytes[2]!) + toHex(bytes[1]!) + toHex(bytes[0]!) + '-' +
-        toHex(bytes[5]!) + toHex(bytes[4]!) + '-' +
-        toHex(bytes[7]!) + toHex(bytes[6]!) + '-' +
-        toHex(bytes[8]!) + toHex(bytes[9]!) + '-' +
-        toHex(bytes[10]!) + toHex(bytes[11]!) + toHex(bytes[12]!) + toHex(bytes[13]!) + toHex(bytes[14]!) + toHex(bytes[15]!)
-      );
+      return ([3, 2, 1, 0, '-', 5, 4, '-', 7, 6, '-', 8, 9, '-', 10, 11, 12, 13, 14, 15] as const)
+        .map(i => i === '-' ? '-' : bytes[i]!.toString(16).padStart(2, '0').toUpperCase())
+        .join('');
     },
 
     /** Reads a UTF-16LE string */
