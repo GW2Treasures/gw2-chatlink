@@ -1,3 +1,4 @@
+import { ChatlinkError } from './error.js';
 import { ChatlinkType, Profession, type DecodedChatlink, type DyeSelection, type TraitSelection } from './types.js';
 
 /**
@@ -40,232 +41,240 @@ export function decode<T extends ChatlinkType>(input: string, expectedType: T): 
 export function decode(input: string, expectedType?: ChatlinkType): DecodedChatlink {
   // input is in the form of `[&<base64>]`
   if (!input.startsWith('[&') || !input.endsWith(']')) {
-    throw new Error('Invalid chatlink format');
+    throw new ChatlinkError('Invalid chatlink format');
   }
 
   // convert base64 input to ArrayBuffer
-  const buffer = 'fromBase64' in Uint8Array
-    ? Uint8Array.fromBase64(input.slice(2, -1)).buffer
-    : Uint8Array.from(atob(input.slice(2, -1)), c => c.charCodeAt(0)).buffer;
+  try {
+    const buffer = 'fromBase64' in Uint8Array
+      ? Uint8Array.fromBase64(input.slice(2, -1)).buffer
+      : Uint8Array.from(atob(input.slice(2, -1)), c => c.charCodeAt(0)).buffer;
 
-  const data = reader(buffer);
+    const data = reader(buffer);
 
-  // read type
-  const type = data.readUint8();
+    // read type
+    const type = data.readUint8();
 
-  // check expected type
-  if (expectedType && type !== expectedType) {
-    throw new Error(`Unexpected chatlink type: expected ${expectedType}, got ${type}`);
-  }
-
-  switch(type) {
-    case ChatlinkType.Coin:
-    case ChatlinkType.NpcText:
-    case ChatlinkType.Map:
-    case ChatlinkType.Skill:
-    case ChatlinkType.Trait:
-    case ChatlinkType.Recipe:
-    case ChatlinkType.Wardrobe:
-    case ChatlinkType.Outfit:
-    case ChatlinkType.Achievement:
-      return { type, data: data.readUint32() };
-    case ChatlinkType.Item: {
-      const quantity = data.readUint8();
-      const itemIdAndFlags = data.readUint32();
-      // read first 3 bytes as itemId
-      const itemId = (itemIdAndFlags & 0x00FFFFFF);
-      const flags = (itemIdAndFlags & 0xFF000000) >>> 24;
-
-      return {
-        type,
-        data: {
-          itemId,
-          quantity,
-          skin: flags & 0x80 ? data.readUint32() : undefined,
-          upgrade1: flags & 0x40 ? data.readUint32() : undefined,
-          upgrade2: flags & 0x20 ? data.readUint32() : undefined,
-          nameDecryptionKey: flags & 0x10 ? data.readBigUint64() : undefined,
-          descriptionDecryptionKey: flags & 0x08 ? data.readBigUint64() : undefined,
-        }
-      };
+    // check expected type
+    if (expectedType && type !== expectedType) {
+      throw new ChatlinkError(`Unexpected chatlink type: expected 0x${toHex(expectedType)}, got 0x${toHex(type)}`);
     }
-    case ChatlinkType.PvpGame:
-      return { type, data: undefined }; // unknown format
-    case ChatlinkType.User:
-      return { type, data: { accountId: data.readUuid(), characterName: data.readString() }};
-    case ChatlinkType.WvWObjective:
-      return { type, data: { objectiveId: data.readUint32(), mapId: data.readUint32() }};
-    case ChatlinkType.BuildTemplate: {
-      const profession = data.readUint8() as Profession;
 
-      const specialization1 = data.readUint8();
-      const traitChoices1 = data.readTraitSelection();
-      const specialization2 = data.readUint8();
-      const traitChoices2 = data.readTraitSelection();
-      const specialization3 = data.readUint8();
-      const traitChoices3 = data.readTraitSelection();
+    switch(type) {
+      case ChatlinkType.Coin:
+      case ChatlinkType.NpcText:
+      case ChatlinkType.Map:
+      case ChatlinkType.Skill:
+      case ChatlinkType.Trait:
+      case ChatlinkType.Recipe:
+      case ChatlinkType.Wardrobe:
+      case ChatlinkType.Outfit:
+      case ChatlinkType.Achievement:
+        return { type, data: data.readUint32() };
+      case ChatlinkType.Item: {
+        const quantity = data.readUint8();
+        const itemIdAndFlags = data.readUint32();
+        // read first 3 bytes as itemId
+        const itemId = (itemIdAndFlags & 0x00FFFFFF);
+        const flags = (itemIdAndFlags & 0xFF000000) >>> 24;
 
-      const terrestrialHealingSkillPalette = data.readUint16();
-      const aquaticHealingSkillPalette = data.readUint16();
-      const terrestrialUtilitySkillPalette1 = data.readUint16();
-      const aquaticUtilitySkillPalette1 = data.readUint16();
-      const terrestrialUtilitySkillPalette2 = data.readUint16();
-      const aquaticUtilitySkillPalette2 = data.readUint16();
-      const terrestrialUtilitySkillPalette3 = data.readUint16();
-      const aquaticUtilitySkillPalette3 = data.readUint16();
-      const terrestrialEliteSkillPalette = data.readUint16();
-      const aquaticEliteSkillPalette = data.readUint16();
-
-      // Ranger
-      let terrestrialPet1;
-      let terrestrialPet2;
-      let aquaticPet1;
-      let aquaticPet2;
-      // Revenant
-      let activeTerrestrialLegend;
-      let inactiveTerrestrialLegend;
-      let activeAquaticLegend;
-      let inactiveAquaticLegend;
-      let inactiveTerrestrialLegendUtilitySkillPalette1;
-      let inactiveTerrestrialLegendUtilitySkillPalette2;
-      let inactiveTerrestrialLegendUtilitySkillPalette3;
-      let inactiveAquaticLegendUtilitySkillPalette1;
-      let inactiveAquaticLegendUtilitySkillPalette2;
-      let inactiveAquaticLegendUtilitySkillPalette3;
-
-      switch (profession) {
-        case Profession.Ranger:
-          terrestrialPet1 = data.readUint8();
-          terrestrialPet2 = data.readUint8();
-          aquaticPet1 = data.readUint8();
-          aquaticPet2 = data.readUint8();
-          data.skip(12);
-          break;
-        case Profession.Revenant:
-          activeTerrestrialLegend = data.readUint8();
-          inactiveTerrestrialLegend = data.readUint8();
-          activeAquaticLegend = data.readUint8();
-          inactiveAquaticLegend = data.readUint8();
-          inactiveTerrestrialLegendUtilitySkillPalette1 = data.readUint16();
-          inactiveTerrestrialLegendUtilitySkillPalette2 = data.readUint16();
-          inactiveTerrestrialLegendUtilitySkillPalette3 = data.readUint16();
-          inactiveAquaticLegendUtilitySkillPalette1 = data.readUint16();
-          inactiveAquaticLegendUtilitySkillPalette2 = data.readUint16();
-          inactiveAquaticLegendUtilitySkillPalette3 = data.readUint16();
-          break;
-        default:
-          data.skip(16);
-          break;
+        return {
+          type,
+          data: {
+            itemId,
+            quantity,
+            skin: flags & 0x80 ? data.readUint32() : undefined,
+            upgrade1: flags & 0x40 ? data.readUint32() : undefined,
+            upgrade2: flags & 0x20 ? data.readUint32() : undefined,
+            nameDecryptionKey: flags & 0x10 ? data.readBigUint64() : undefined,
+            descriptionDecryptionKey: flags & 0x08 ? data.readBigUint64() : undefined,
+          }
+        };
       }
+      case ChatlinkType.PvpGame:
+        return { type, data: undefined }; // unknown format
+      case ChatlinkType.User:
+        return { type, data: { accountId: data.readUuid(), characterName: data.readString() }};
+      case ChatlinkType.WvWObjective:
+        return { type, data: { objectiveId: data.readUint32(), mapId: data.readUint32() }};
+      case ChatlinkType.BuildTemplate: {
+        const profession = data.readUint8() as Profession;
 
-      // check if we are at the end of the buffer
-      const isLegacy = data.atEnd();
+        const specialization1 = data.readUint8();
+        const traitChoices1 = data.readTraitSelection();
+        const specialization2 = data.readUint8();
+        const traitChoices2 = data.readTraitSelection();
+        const specialization3 = data.readUint8();
+        const traitChoices3 = data.readTraitSelection();
 
-      const selectedWeapons = isLegacy ? undefined : data.readDynamicArrayUint16()
-      const selectedSkillVariants = isLegacy ? undefined : data.readDynamicArrayUint32()
+        const terrestrialHealingSkillPalette = data.readUint16();
+        const aquaticHealingSkillPalette = data.readUint16();
+        const terrestrialUtilitySkillPalette1 = data.readUint16();
+        const aquaticUtilitySkillPalette1 = data.readUint16();
+        const terrestrialUtilitySkillPalette2 = data.readUint16();
+        const aquaticUtilitySkillPalette2 = data.readUint16();
+        const terrestrialUtilitySkillPalette3 = data.readUint16();
+        const aquaticUtilitySkillPalette3 = data.readUint16();
+        const terrestrialEliteSkillPalette = data.readUint16();
+        const aquaticEliteSkillPalette = data.readUint16();
 
-      return {
-        type,
-        data: {
-          profession,
+        // Ranger
+        let terrestrialPet1;
+        let terrestrialPet2;
+        let aquaticPet1;
+        let aquaticPet2;
+        // Revenant
+        let activeTerrestrialLegend;
+        let inactiveTerrestrialLegend;
+        let activeAquaticLegend;
+        let inactiveAquaticLegend;
+        let inactiveTerrestrialLegendUtilitySkillPalette1;
+        let inactiveTerrestrialLegendUtilitySkillPalette2;
+        let inactiveTerrestrialLegendUtilitySkillPalette3;
+        let inactiveAquaticLegendUtilitySkillPalette1;
+        let inactiveAquaticLegendUtilitySkillPalette2;
+        let inactiveAquaticLegendUtilitySkillPalette3;
 
-          specialization1,
-          traitChoices1,
-          specialization2,
-          traitChoices2,
-          specialization3,
-          traitChoices3,
-
-          terrestrialHealingSkillPalette,
-          terrestrialUtilitySkillPalette1,
-          terrestrialUtilitySkillPalette2,
-          terrestrialUtilitySkillPalette3,
-          terrestrialEliteSkillPalette,
-
-          aquaticHealingSkillPalette,
-          aquaticUtilitySkillPalette1,
-          aquaticUtilitySkillPalette2,
-          aquaticUtilitySkillPalette3,
-          aquaticEliteSkillPalette,
-
-          terrestrialPet1,
-          terrestrialPet2,
-          aquaticPet1,
-          aquaticPet2,
-
-          activeTerrestrialLegend,
-          inactiveTerrestrialLegend,
-          activeAquaticLegend,
-          inactiveAquaticLegend,
-          inactiveTerrestrialLegendUtilitySkillPalette1,
-          inactiveTerrestrialLegendUtilitySkillPalette2,
-          inactiveTerrestrialLegendUtilitySkillPalette3,
-          inactiveAquaticLegendUtilitySkillPalette1,
-          inactiveAquaticLegendUtilitySkillPalette2,
-          inactiveAquaticLegendUtilitySkillPalette3,
-
-          selectedWeapons,
-          selectedSkillVariants,
+        switch (profession) {
+          case Profession.Ranger:
+            terrestrialPet1 = data.readUint8();
+            terrestrialPet2 = data.readUint8();
+            aquaticPet1 = data.readUint8();
+            aquaticPet2 = data.readUint8();
+            data.skip(12);
+            break;
+          case Profession.Revenant:
+            activeTerrestrialLegend = data.readUint8();
+            inactiveTerrestrialLegend = data.readUint8();
+            activeAquaticLegend = data.readUint8();
+            inactiveAquaticLegend = data.readUint8();
+            inactiveTerrestrialLegendUtilitySkillPalette1 = data.readUint16();
+            inactiveTerrestrialLegendUtilitySkillPalette2 = data.readUint16();
+            inactiveTerrestrialLegendUtilitySkillPalette3 = data.readUint16();
+            inactiveAquaticLegendUtilitySkillPalette1 = data.readUint16();
+            inactiveAquaticLegendUtilitySkillPalette2 = data.readUint16();
+            inactiveAquaticLegendUtilitySkillPalette3 = data.readUint16();
+            break;
+          default:
+            data.skip(16);
+            break;
         }
-      };
+
+        // check if we are at the end of the buffer
+        const isLegacy = data.atEnd();
+
+        const selectedWeapons = isLegacy ? undefined : data.readDynamicArrayUint16()
+        const selectedSkillVariants = isLegacy ? undefined : data.readDynamicArrayUint32()
+
+        return {
+          type,
+          data: {
+            profession,
+
+            specialization1,
+            traitChoices1,
+            specialization2,
+            traitChoices2,
+            specialization3,
+            traitChoices3,
+
+            terrestrialHealingSkillPalette,
+            terrestrialUtilitySkillPalette1,
+            terrestrialUtilitySkillPalette2,
+            terrestrialUtilitySkillPalette3,
+            terrestrialEliteSkillPalette,
+
+            aquaticHealingSkillPalette,
+            aquaticUtilitySkillPalette1,
+            aquaticUtilitySkillPalette2,
+            aquaticUtilitySkillPalette3,
+            aquaticEliteSkillPalette,
+
+            terrestrialPet1,
+            terrestrialPet2,
+            aquaticPet1,
+            aquaticPet2,
+
+            activeTerrestrialLegend,
+            inactiveTerrestrialLegend,
+            activeAquaticLegend,
+            inactiveAquaticLegend,
+            inactiveTerrestrialLegendUtilitySkillPalette1,
+            inactiveTerrestrialLegendUtilitySkillPalette2,
+            inactiveTerrestrialLegendUtilitySkillPalette3,
+            inactiveAquaticLegendUtilitySkillPalette1,
+            inactiveAquaticLegendUtilitySkillPalette2,
+            inactiveAquaticLegendUtilitySkillPalette3,
+
+            selectedWeapons,
+            selectedSkillVariants,
+          }
+        };
+      }
+      case ChatlinkType.FashionTemplate:
+        const aquabreather = data.readUint16();
+        const backpack = data.readUint16();
+        const backpackDyes: DyeSelection = [data.readUint16(), data.readUint16(), data.readUint16(), data.readUint16()];
+        const coat = data.readUint16();
+        const coatDyes: DyeSelection = [data.readUint16(), data.readUint16(), data.readUint16(), data.readUint16()];
+        const boots = data.readUint16();
+        const bootsDyes: DyeSelection = [data.readUint16(), data.readUint16(), data.readUint16(), data.readUint16()];
+        const gloves = data.readUint16();
+        const glovesDyes: DyeSelection = [data.readUint16(), data.readUint16(), data.readUint16(), data.readUint16()];
+        const helm = data.readUint16();
+        const helmDyes: DyeSelection = [data.readUint16(), data.readUint16(), data.readUint16(), data.readUint16()];
+        const leggings = data.readUint16();
+        const leggingsDyes: DyeSelection = [data.readUint16(), data.readUint16(), data.readUint16(), data.readUint16()];
+        const shoulders = data.readUint16();
+        const shouldersDyes: DyeSelection = [data.readUint16(), data.readUint16(), data.readUint16(), data.readUint16()];
+        const outfit = data.readUint16();
+        const outfitDyes: DyeSelection = [data.readUint16(), data.readUint16(), data.readUint16(), data.readUint16()];
+        const weaponAquatic1 = data.readUint16();
+        const weaponAquatic2 = data.readUint16();
+        const weaponA1 = data.readUint16();
+        const weaponA2 = data.readUint16();
+        const weaponB1 = data.readUint16();
+        const weaponB2 = data.readUint16();
+        const visibilityFlags = data.readUint16();
+
+        return {
+          type,
+          data: {
+            aquabreather,
+            backpack,
+            backpackDyes,
+            coat,
+            coatDyes,
+            boots,
+            bootsDyes,
+            gloves,
+            glovesDyes,
+            helm,
+            helmDyes,
+            leggings,
+            leggingsDyes,
+            shoulders,
+            shouldersDyes,
+            outfit,
+            outfitDyes,
+            weaponAquatic1,
+            weaponAquatic2,
+            weaponA1,
+            weaponA2,
+            weaponB1,
+            weaponB2,
+            visibilityFlags,
+          }
+        };
+      default:
+        throw new ChatlinkError(`Unknown chatlink type: 0x${toHex(type)}`);
     }
-    case ChatlinkType.FashionTemplate:
-      const aquabreather = data.readUint16();
-      const backpack = data.readUint16();
-      const backpackDyes: DyeSelection = [data.readUint16(), data.readUint16(), data.readUint16(), data.readUint16()];
-      const coat = data.readUint16();
-      const coatDyes: DyeSelection = [data.readUint16(), data.readUint16(), data.readUint16(), data.readUint16()];
-      const boots = data.readUint16();
-      const bootsDyes: DyeSelection = [data.readUint16(), data.readUint16(), data.readUint16(), data.readUint16()];
-      const gloves = data.readUint16();
-      const glovesDyes: DyeSelection = [data.readUint16(), data.readUint16(), data.readUint16(), data.readUint16()];
-      const helm = data.readUint16();
-      const helmDyes: DyeSelection = [data.readUint16(), data.readUint16(), data.readUint16(), data.readUint16()];
-      const leggings = data.readUint16();
-      const leggingsDyes: DyeSelection = [data.readUint16(), data.readUint16(), data.readUint16(), data.readUint16()];
-      const shoulders = data.readUint16();
-      const shouldersDyes: DyeSelection = [data.readUint16(), data.readUint16(), data.readUint16(), data.readUint16()];
-      const outfit = data.readUint16();
-      const outfitDyes: DyeSelection = [data.readUint16(), data.readUint16(), data.readUint16(), data.readUint16()];
-      const weaponAquatic1 = data.readUint16();
-      const weaponAquatic2 = data.readUint16();
-      const weaponA1 = data.readUint16();
-      const weaponA2 = data.readUint16();
-      const weaponB1 = data.readUint16();
-      const weaponB2 = data.readUint16();
-      const visibilityFlags = data.readUint16();
+  } catch (cause) {
+    if(cause instanceof ChatlinkError) {
+      throw cause;
+    }
 
-      return {
-        type,
-        data: {
-          aquabreather,
-          backpack,
-          backpackDyes,
-          coat,
-          coatDyes,
-          boots,
-          bootsDyes,
-          gloves,
-          glovesDyes,
-          helm,
-          helmDyes,
-          leggings,
-          leggingsDyes,
-          shoulders,
-          shouldersDyes,
-          outfit,
-          outfitDyes,
-          weaponAquatic1,
-          weaponAquatic2,
-          weaponA1,
-          weaponA2,
-          weaponB1,
-          weaponB2,
-          visibilityFlags,
-        }
-      };
-    default:
-      throw new Error(`Unknown chatlink type: ${type}`);
+    throw new ChatlinkError('Invalid chatlink', { cause });
   }
 }
 
@@ -346,7 +355,7 @@ function reader(buffer: ArrayBuffer) {
 
       // format as UUID
       return ([3, 2, 1, 0, '-', 5, 4, '-', 7, 6, '-', 8, 9, '-', 10, 11, 12, 13, 14, 15] as const)
-        .map(i => i === '-' ? '-' : bytes[i]!.toString(16).padStart(2, '0').toUpperCase())
+        .map(i => i === '-' ? '-' : toHex(bytes[i]!))
         .join('');
     },
 
@@ -363,4 +372,8 @@ function reader(buffer: ArrayBuffer) {
       return str;
     }
   };
+}
+
+function toHex(byte: number): string {
+  return byte.toString(16).padStart(2, '0').toUpperCase();
 }

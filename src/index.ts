@@ -1,4 +1,5 @@
 export { decode } from './decode.js';
 // export { encode } from './encode.js';
+export { ChatlinkError } from './error.js';
 
-export { ChatlinkType } from './types.js';
+export * from './types.js';
