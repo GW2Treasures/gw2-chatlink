@@ -129,11 +129,17 @@ export namespace ChatlinkData {
     shouldersDyes: DyeSelection;
     outfit: number;
     outfitDyes: DyeSelection;
-    weaponAquatic1: number;
-    weaponAquatic2: number;
+    /** Aquatic weapon set A */
+    weaponAquaticA: number;
+    /** Aquatic weapon set B */
+    weaponAquaticB: number;
+    /** Weapon set A mainhand */
     weaponA1: number;
+    /** Weapon set A offhand */
     weaponA2: number;
+    /** Weapon set B mainhand */
     weaponB1: number;
+    /** Weapon set B offhand */
     weaponB2: number;
     visibilityFlags: number;
   }

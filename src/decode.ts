@@ -232,8 +232,8 @@ export function decodeChatlink(input: string, expectedType?: ChatlinkType): Deco
         const shouldersDyes: DyeSelection = [data.readUint16(), data.readUint16(), data.readUint16(), data.readUint16()];
         const outfit = data.readUint16();
         const outfitDyes: DyeSelection = [data.readUint16(), data.readUint16(), data.readUint16(), data.readUint16()];
-        const weaponAquatic1 = data.readUint16();
-        const weaponAquatic2 = data.readUint16();
+        const weaponAquaticA = data.readUint16();
+        const weaponAquaticB = data.readUint16();
         const weaponA1 = data.readUint16();
         const weaponA2 = data.readUint16();
         const weaponB1 = data.readUint16();
@@ -260,8 +260,8 @@ export function decodeChatlink(input: string, expectedType?: ChatlinkType): Deco
             shouldersDyes,
             outfit,
             outfitDyes,
-            weaponAquatic1,
-            weaponAquatic2,
+            weaponAquaticA,
+            weaponAquaticB,
             weaponA1,
             weaponA2,
             weaponB1,
