@@ -1,6 +1,7 @@
 import { ChatlinkType, decodeChatlink } from '../src/index.js';
 import { describe, expect, test } from 'vitest';
 import { Profession } from '../src/types.js';
+import { decodeAllChatlinks, tryDecodeChatlink } from '../src/decode.js';
 
 describe('decode', () => {
   test.for([
@@ -439,18 +440,69 @@ describe('decode', () => {
   });
 });
 
-test('invalid chatlink', () => {
-  // invalid base64
-  expect(() => decodeChatlink('[&INVALID!]')).toThrowError('Invalid chatlink');
-  // missing data
-  expect(() => decodeChatlink('[&AQ==]')).toThrowError('Invalid chatlink');
-  // invalid format
-  expect(() => decodeChatlink('invalid')).toThrowError('Invalid chatlink');
+describe('decodeChatlink', () => {
+  test('invalid chatlink', () => {
+    // invalid base64
+    expect(() => decodeChatlink('[&INVALID!]')).toThrowError('Invalid chatlink');
+    // missing data
+    expect(() => decodeChatlink('[&AQ==]')).toThrowError('Invalid chatlink');
+    // invalid format
+    expect(() => decodeChatlink('invalid')).toThrowError('Invalid chatlink');
+  });
+
+  test('unexpected type', () => {
+    expect(() => decodeChatlink('[&AQAAAAA=]', ChatlinkType.Achievement)).toThrowError('Unexpected chatlink type: expected 0x0E, got 0x01');
+  });
+  test('expected type', () => {
+    expect(() => decodeChatlink('[&AQAAAAA=]', ChatlinkType.Coin)).not.toThrowError();
+  });
 });
 
-test('unexpected type', () => {
-  expect(() => decodeChatlink('[&AQAAAAA=]', ChatlinkType.Achievement)).toThrowError('Unexpected chatlink type: expected 0x0E, got 0x01');
+describe('tryDecodeChatlink', () => {
+  test('invalid chatlink', () => {
+    // invalid base64
+    expect(tryDecodeChatlink('[&INVALID!]')).toBeUndefined();
+    // missing data
+    expect(tryDecodeChatlink('[&AQ==]')).toBeUndefined();
+    // invalid format
+    expect(tryDecodeChatlink('invalid')).toBeUndefined();
+  });
+
+  test('unexpected type', () => {
+    expect(tryDecodeChatlink('[&AQAAAAA=]', ChatlinkType.Achievement)).toBeUndefined();
+  });
+  test('expected type', () => {
+    expect(tryDecodeChatlink('[&AQAAAAA=]', ChatlinkType.Coin)).not.toBeUndefined();
+  });
 });
-test('expected type', () => {
-  expect(() => decodeChatlink('[&AQAAAAA=]', ChatlinkType.Coin)).not.toThrowError();
+
+describe('decodeAllChatlinks', () => {
+  test('multiple chatlinks', () => {
+    // basic test
+    expect(decodeAllChatlinks('test [&AgHJjAAA] and [&AgHGjAAA].')).toHaveLength(2);
+    // no separation between chatlinks
+    expect(decodeAllChatlinks('test [&AgHJjAAA][&AgHGjAAA].')).toHaveLength(2);
+    // same chatlink repeated
+    expect(decodeAllChatlinks('test [&AgHJjAAA][&AgHJjAAA].')).toHaveLength(2);
+  });
+
+  test('with expected type', () => {
+    // basic test
+    expect(decodeAllChatlinks('test [&AgHJjAAA] and [&AgHGjAAA].', ChatlinkType.Item)).toHaveLength(2);
+    // different types (item + coin)
+    expect(decodeAllChatlinks('test [&AgHJjAAA] and [&AQAAAAA=].', ChatlinkType.Item)).toHaveLength(1);
+    // only different types
+    expect(decodeAllChatlinks('test [&AQEAAAA=] and [&AQAAAAA=].', ChatlinkType.Item)).toHaveLength(0);
+  });
+
+  test('invalid chatlinks', () => {
+    // empty string
+    expect(decodeAllChatlinks('')).toHaveLength(0);
+    expect(decodeAllChatlinks('no chatlinks in here')).toHaveLength(0);
+
+    // invalid base64
+    expect(decodeAllChatlinks('[&INVALID!] [&AgHJjAAA]')).toHaveLength(1);
+    // missing data
+    expect(decodeAllChatlinks('[&AQ==] [&AgHJjAAA]')).toHaveLength(1);
+  })
 });

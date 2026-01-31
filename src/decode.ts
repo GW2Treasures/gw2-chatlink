@@ -6,12 +6,13 @@ import { ItemFlags, toHex } from './utils.js';
  * Decode a Guild Wars 2 chatlink.
  * @param input The chatlink string to decode.
  * @returns The decoded chatlink data.
- * @throws {Error} If the chatlink format is invalid.
+ * @throws {ChatlinkError} If the chatlink is invalid.
+ * @see {@link tryDecodeChatlink `tryDecodeChatlink`} for a version that returns `undefined` for invalid chatlinks.
  * @example
  * ```ts
- * import { decode } from '@gw2/chatlink';
+ * import { decodeChatlink } from '@gw2/chatlink';
  *
- * const chatlink = decode('[&AgGqtgCAfQ4AAA==]');
+ * const chatlink = decodeChatlink('[&AgGqtgCAfQ4AAA==]');
  * console.log(chatlink);
  * // {
  * //   type: ChatlinkType.Item,
@@ -19,18 +20,19 @@ import { ItemFlags, toHex } from './utils.js';
  * // }
  * ```
  */
-export function decode(input: string): DecodedChatlink;
+export function decodeChatlink(input: string): DecodedChatlink;
 /**
  * Decode a Guild Wars 2 chatlink.
  * @param input The chatlink string to decode.
  * @param expectedType Expected chatlink type.
  * @returns The decoded chatlink data.
- * @throws {Error} If the chatlink format is invalid or the type does not match the expected type.
+ * @throws {ChatlinkError} If the chatlink is invalid or the type does not match the expected type.
+ * @see {@link tryDecodeChatlink `tryDecodeChatlink`} for a version that returns `undefined` for invalid chatlinks.
  * @example
  * ```ts
- * import { decode } from '@gw2/chatlink';
+ * import { decodeChatlink } from '@gw2/chatlink';
  *
- * const chatlink = decode('[&AgGqtgCAfQ4AAA==]', ChatlinkType.Item);
+ * const chatlink = decodeChatlink('[&AgGqtgCAfQ4AAA==]', ChatlinkType.Item);
  * console.log(chatlink);
  * // {
  * //   type: ChatlinkType.Item,
@@ -38,8 +40,8 @@ export function decode(input: string): DecodedChatlink;
  * // }
  * ```
  */
-export function decode<T extends ChatlinkType>(input: string, expectedType: T): DecodedChatlink<T>;
-export function decode(input: string, expectedType?: ChatlinkType): DecodedChatlink {
+export function decodeChatlink<T extends ChatlinkType>(input: string, expectedType: T): DecodedChatlink<T>;
+export function decodeChatlink(input: string, expectedType?: ChatlinkType): DecodedChatlink {
   // input is in the form of `[&<base64>]`
   if (!input.startsWith('[&') || !input.endsWith(']')) {
     throw new ChatlinkError('Invalid chatlink format');
@@ -374,3 +376,103 @@ function reader(buffer: ArrayBuffer) {
     }
   };
 }
+
+/**
+ * Try to decode a Guild Wars 2 chatlink.
+ * @param input The chatlink string to decode.
+ * @returns The decoded chatlink data or undefined if the chatlink is invalid.
+ * @see {@link decodeChatlink `decodeChatlink`} for a version that throws on invalid chatlinks.
+ * @example
+ * ```ts
+ * import { tryDecodeChatlink } from '@gw2/chatlink';
+ *
+ * const chatlink = tryDecodeChatlink('[&AgGqtgCAfQ4AAA==]');
+ * console.log(chatlink);
+ * // {
+ * //   type: ChatlinkType.Item,
+ * //   data: { itemId: 46762, quantity: 1, skin: 3709 }
+ * // }
+ * ```
+ */
+export function tryDecodeChatlink(input: string): DecodedChatlink | undefined;
+/**
+ * Decode a Guild Wars 2 chatlink.
+ * @param input The chatlink string to decode.
+ * @param expectedType Expected chatlink type.
+ * @returns The decoded chatlink data or undefined if the chatlink is invalid or the type does not match the expected type.
+ * @see {@link decodeChatlink `decodeChatlink`} for a version that throws on invalid chatlinks.
+ * @example
+ * ```ts
+ * import { tryDecodeChatlink } from '@gw2/chatlink';
+ *
+ * const chatlink = tryDecodeChatlink('[&AgGqtgCAfQ4AAA==]', ChatlinkType.Item);
+ * console.log(chatlink);
+ * // {
+ * //   type: ChatlinkType.Item,
+ * //   data: { itemId: 46762, quantity: 1, skin: 3709 }
+ * // }
+ * ```
+ */
+export function tryDecodeChatlink<T extends ChatlinkType>(input: string, expectedType: T): DecodedChatlink<T> | undefined;
+export function tryDecodeChatlink(input: string, expectedType?: ChatlinkType): DecodedChatlink | undefined {
+  try {
+    return expectedType ? decodeChatlink(input, expectedType) : decodeChatlink(input);
+  } catch {
+    return undefined;
+  }
+}
+
+
+/**
+ * Decoded all chatlinks in a string. Invalid chatlinks are ignored.
+ * @param input A string potentially containing one or more chatlinks.
+ * @returns A list of all valid chatlinks found in the input string.
+ * @example
+ * ```ts
+ * import { decodeAllChatlinks } from '@gw2/chatlink';
+ *
+ * const chatlinks = decodeAllChatlinks('Check out these items: [&AgHJjAAA] and [&AgHGjAAA]!');
+ * console.log(chatlinks);
+ * // [
+ * //   {
+ * //     type: ChatlinkType.Item,
+ * //     data: { itemId: 36041, quantity: 1 }
+ * //   },
+ * //   {
+ * //     type: ChatlinkType.Item,
+ * //     data: { itemId: 36038, quantity: 1 }
+ * //   }
+ * // ]
+ * ```
+ */
+export function decodeAllChatlinks(input: string): DecodedChatlink[];
+/**
+ * Decoded all chatlinks of a specific type in a string. Invalid chatlinks are ignored.
+ * @param input A string potentially containing one or more chatlinks.
+ * @returns A list of all valid chatlinks found in the input string.
+ * @example
+ * ```ts
+ * import { decodeAllChatlinks } from '@gw2/chatlink';
+ *
+ * const chatlinks = decodeAllChatlinks('Check out these items: [&AgHJjAAA] and [&AgHGjAAA]!');
+ * console.log(chatlinks);
+ * // [
+ * //   {
+ * //     type: ChatlinkType.Item,
+ * //     data: { itemId: 36041, quantity: 1 }
+ * //   },
+ * //   {
+ * //     type: ChatlinkType.Item,
+ * //     data: { itemId: 36038, quantity: 1 }
+ * //   }
+ * // ]
+ * ```
+ */
+export function decodeAllChatlinks<T extends ChatlinkType>(input: string, type: T): DecodedChatlink<T>[];
+export function decodeAllChatlinks(input: string, type?: ChatlinkType): DecodedChatlink[] {
+  return Array.from(input.matchAll(CHATLINK_REGEX))
+    .map(chatlink => type ? tryDecodeChatlink(chatlink[0], type) : tryDecodeChatlink(chatlink[0]))
+    .filter(x => x !== undefined);
+}
+
+const CHATLINK_REGEX = /\[&[A-Za-z0-9+/]+={0,2}\]/g;
