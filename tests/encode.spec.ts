@@ -333,8 +333,8 @@ describe('encode', () => {
         visibilityFlags: 32767,
         weaponA1: 3445,
         weaponA2: 3443,
-        weaponAquatic1: 3090,
-        weaponAquatic2: 3461,
+        weaponAquaticA: 3090,
+        weaponAquaticB: 3461,
         weaponB1: 3478,
         weaponB2: 3475,
       }
@@ -402,8 +402,8 @@ describe('encode', () => {
         visibilityFlags: 32767,
         weaponA1: 12577,
         weaponA2: 11935,
-        weaponAquatic1: 12818,
-        weaponAquatic2: 3775,
+        weaponAquaticA: 12818,
+        weaponAquaticB: 3775,
         weaponB1: 9811,
         weaponB2: 13017,
       }

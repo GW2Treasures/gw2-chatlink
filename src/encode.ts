@@ -192,8 +192,8 @@ export function encode(...[type, data]: EncodeChatlinkArgs): `[&${string}]` {
       bytes.writeUint16(data.outfitDyes[1] ?? 1);
       bytes.writeUint16(data.outfitDyes[2] ?? 1);
       bytes.writeUint16(data.outfitDyes[3] ?? 1);
-      bytes.writeUint16(data.weaponAquatic1);
-      bytes.writeUint16(data.weaponAquatic2);
+      bytes.writeUint16(data.weaponAquaticA);
+      bytes.writeUint16(data.weaponAquaticB);
       bytes.writeUint16(data.weaponA1);
       bytes.writeUint16(data.weaponA2);
       bytes.writeUint16(data.weaponB1);
