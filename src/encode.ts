@@ -4,7 +4,11 @@ import { ItemFlags, toHex } from "./utils.js";
 
 // Generate all valid combinations of arguments for encode function
 type EncodeChatlinkArgs = {
-  [T in ChatlinkType]: [type: T, data: ChatlinkData<T>];
+  [T in ChatlinkType]: [
+    type: T,
+    data:
+      T extends ChatlinkType.Item ? ChatlinkData<T> | number : // allow encoding items by just itemId
+      ChatlinkData<T>];
 }[ChatlinkType]
 
 /**
@@ -22,6 +26,21 @@ type EncodeChatlinkArgs = {
  * ```
  */
 export function encode<T extends ChatlinkType>(type: T, data: ChatlinkData<T>): `[&${string}]`;
+/**
+ * Encode a Guild Wars 2 item chatlink by item id. Quantity defaults to 1.
+ * @param type The type of chatlink to encode
+ * @param itemId The id of the item
+ * @returns The encoded chatlink string
+ * @example
+ * ```ts
+ * import { encodeChatlink } from '@gw2/chatlink';
+ *
+ * const chatlink = encodeChatlink(ChatlinkType.Item, { itemId: 46762, quantity: 1, skin: 3709 });
+ *
+ * console.log(chatlink); // "[&AgGqtgCAfQ4AAA==]"
+ * ```
+ */
+export function encode(type: ChatlinkType.Item, itemId: number): `[&${string}]`;
 export function encode(...[type, data]: EncodeChatlinkArgs): `[&${string}]` {
   const bytes = writer();
 
@@ -41,7 +60,7 @@ export function encode(...[type, data]: EncodeChatlinkArgs): `[&${string}]` {
       bytes.writeUint32(data);
       break;
     case ChatlinkType.Item: {
-      const item = data as ChatlinkData.Item;
+      const item = typeof data === 'number' ? { itemId: data, quantity: 1 } : data;
 
       const flags = (0
         | (item.skin !== undefined ? ItemFlags.HasSkin : 0)
@@ -74,9 +93,8 @@ export function encode(...[type, data]: EncodeChatlinkArgs): `[&${string}]` {
       break;
     }
     case ChatlinkType.User: {
-      const user = data as ChatlinkData.User;
-      bytes.writeUuid(user.accountId);
-      bytes.writeString(user.characterName);
+      bytes.writeUuid(data.accountId);
+      bytes.writeString(data.characterName);
       break;
     }
     case ChatlinkType.WvWObjective: {
@@ -296,5 +314,3 @@ function writer() {
     }
   }
 }
-
-encode(ChatlinkType.Item, { itemId: 12345, quantity: 1 })

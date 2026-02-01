@@ -39,6 +39,7 @@ describe('encode', () => {
     ['[&DoQZAAA=]', { type: ChatlinkType.Achievement, data: 6532 }],
     ['[&DuMbAAA=]', { type: ChatlinkType.Achievement, data: 7139 }],
     // items
+    ['[&AgGqtgAA]', { type: ChatlinkType.Item, data: 46762 }],
     ['[&AgGqtgAA]', { type: ChatlinkType.Item, data: { itemId: 46762, quantity: 1 } }],
     ['[&AgGqtgBA/18AAA==]', { type: ChatlinkType.Item, data: { itemId: 46762, quantity: 1, upgrade1: 24575 }}],
     ['[&AgGqtgBg/18AACdgAAA=]', { type: ChatlinkType.Item, data: { itemId: 46762, quantity: 1, upgrade1: 24575, upgrade2: 24615 }}],
