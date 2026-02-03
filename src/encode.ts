@@ -8,7 +8,8 @@ type EncodeChatlinkArgs = {
     type: T,
     data:
       T extends ChatlinkType.Item ? ChatlinkData<T> | number : // allow encoding items by just itemId
-      ChatlinkData<T>];
+      ChatlinkData<T>
+  ];
 }[ChatlinkType]
 
 /**
@@ -300,10 +301,6 @@ function writer() {
       for (const value of values) {
         this.writeUint32(value)
       }
-    },
-
-    getBytes() {
-      return Uint8Array.from(bytes);
     },
 
     toBase64() {
