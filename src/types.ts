@@ -179,14 +179,13 @@ export enum VisibilityFlags {
   // = 8, // shoes?
   Gloves = 16,
   Helmet = 32,
-  // = 32, // pants?
-  // = 64, // ???
+  // = 64, // pants?
   Shoulders = 128,
   Outfit = 256,
-  AquaticWeapon = 512,
-  AquaticWeapon2 = 1024,
-  Weapon1 = 2048,
-  Weapon1Offhand = 4096,
-  Weapon2 = 8192,
-  Weapon2Offhand = 16384,
+  AquaticWeaponA = 512,
+  AquaticWeaponB = 1024,
+  WeaponA1 = 2048,
+  WeaponA2 = 4096,
+  WeaponB1 = 8192,
+  WeaponB2 = 16384,
 }
