@@ -46,7 +46,7 @@
   },
   "devDependencies": {
     "tsdown": "0.20.0-beta.3",
-    "typescript": "^5.9.3",
-    "vitest": "^4.0.17"
+    "typescript": "5.9.3",
+    "vitest": "4.0.17"
   }
 }

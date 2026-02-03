@@ -12,10 +12,10 @@ importers:
         specifier: 0.20.0-beta.3
         version: 0.20.0-beta.3(typescript@5.9.3)
       typescript:
-        specifier: ^5.9.3
+        specifier: 5.9.3
         version: 5.9.3
       vitest:
-        specifier: ^4.0.17
+        specifier: 4.0.17
         version: 4.0.17
 
 packages:
