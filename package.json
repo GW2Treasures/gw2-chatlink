@@ -1,6 +1,6 @@
 {
   "name": "@gw2/chatlink",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Encode and decode Guild Wars 2 chatlinks",
   "type": "module",
   "exports": {
