@@ -52,6 +52,6 @@
     "@changesets/cli": "2.29.8",
     "tsdown": "0.20.1",
     "typescript": "5.9.3",
-    "vitest": "4.0.17"
+    "vitest": "4.0.18"
   }
 }
