@@ -18,6 +18,9 @@
   },
   "scripts": {
     "build": "tsdown --minify",
+    "changeset": "changeset",
+    "prerelease": "pnpm run build",
+    "release": "changeset publish",
     "test": "vitest"
   },
   "keywords": [
@@ -45,6 +48,8 @@
     "provenance": true
   },
   "devDependencies": {
+    "@changeset-bot/changelog": "0.0.4",
+    "@changesets/cli": "^2.29.8",
     "tsdown": "0.20.0-beta.3",
     "typescript": "5.9.3",
     "vitest": "4.0.17"
