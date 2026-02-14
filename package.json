@@ -42,7 +42,7 @@
     "url": "https://github.com/gw2treasures/gw2-chatlink/issues"
   },
   "homepage": "https://github.com/GW2Treasures/gw2-chatlink#readme",
-  "packageManager": "pnpm@10.29.2",
+  "packageManager": "pnpm@10.29.3",
   "publishConfig": {
     "access": "public",
     "provenance": true
