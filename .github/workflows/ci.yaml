@@ -51,7 +51,7 @@ jobs:
       id-token: write
       pull-requests: write
     steps:
-      - uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2
+      - uses: actions/create-github-app-token@f418cff399f7aef4c2f0ad47e25ca7a6abbdd6fc # v3
         id: generate-token
         with:
           app-id: ${{ secrets.GW2T_RELEASE_APP_ID }}
